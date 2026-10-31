@@ -27,6 +27,9 @@ jobs:
           keytool -genkey -v -keystore debug.keystore -alias debug \
             -keyalg RSA -keysize 2048 -validity 10000 \
             -storepass android -keypass android -dname "CN=Debug"
+      - name: Download json.jar
+        run: |
+          curl -L -o lib/json.jar "https://repo1.maven.org/maven2/org/json/json/20231013/json-20231013.jar"
       - name: Create 15MB dummy asset
         run: |
           mkdir -p assets

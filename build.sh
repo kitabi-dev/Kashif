@@ -7,7 +7,7 @@ aapt2 link -o build/unsigned.apk -I lib/android.jar -A assets \
   --manifest AndroidManifest.xml build/res.zip \
   --java build/classes --min-sdk-version 26 --target-sdk-version 33
 
-javac -source 8 -target 8 -cp lib/android.jar \
+javac -source 8 -target 8 -cp lib/android.jar:lib/json.jar \
   -d build/classes src/net/kashif/MainActivity.java build/classes/net/kashif/R.java
 
 find build/classes -name "*.class" > build/classes.txt
