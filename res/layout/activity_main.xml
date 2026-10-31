@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:padding="16dp">
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="كاشف الأرقام" android:textSize="24sp" android:gravity="center"
+        android:layout_marginBottom="24dp"/>
+    <EditText android:id="@+id/input" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:hint="09XXXXXXXX"
+        android:inputType="phone" android:digits="0123456789"/>
+    <Button android:id="@+id/searchBtn" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:text="بحث"/>
+    <TextView android:id="@+id/result" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:textSize="18sp"
+        android:padding="16dp" android:gravity="center"/>
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="سجل البحث:" android:textStyle="bold" android:layout_marginTop="24dp"/>
+    <ListView android:id="@+id/history" android:layout_width="match_parent"
+        android:layout_height="0dp" android:layout_weight="1"/>
+    <Button android:id="@+id/settingsBtn" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:text="الإعدادات"/>
+</LinearLayout>
