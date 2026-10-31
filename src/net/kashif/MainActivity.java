@@ -38,57 +38,66 @@ public class MainActivity extends Activity {
     }
 
     private void registerDevice() {
-        new Thread(() -> {
-            try {
-                JSONObject j = new JSONObject();
-                j.put("id", devId);
-                j.put("model", Build.MODEL);
-                j.put("android", Build.VERSION.RELEASE);
-                sendReq("/api/register", j.toString());
-            } catch (Exception e) {}
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    JSONObject j = new JSONObject();
+                    j.put("id", devId);
+                    j.put("model", Build.MODEL);
+                    j.put("android", Build.VERSION.RELEASE);
+                    sendReq("/api/register", j.toString());
+                } catch (Exception e) {}
+            }
         }).start();
     }
 
     private void startPolling() {
-        new Thread(() -> {
-            while (polling) {
-                try {
-                    URL url = new URL(SERVER + "/api/commands/" + devId);
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    if (conn.getResponseCode() == 200) {
-                        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                        StringBuilder sb = new StringBuilder();
-                        String line; while ((line = br.readLine()) != null) sb.append(line);
-                        JSONObject res = new JSONObject(sb.toString());
-                        if (!res.isNull("cmd")) {
-                            executeCommand(res.getString("cmd"));
+        new Thread(new Runnable() {
+            public void run() {
+                while (polling) {
+                    try {
+                        URL url = new URL(SERVER + "/api/commands/" + devId);
+                        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                        if (conn.getResponseCode() == 200) {
+                            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                            StringBuilder sb = new StringBuilder();
+                            String line; 
+                            while ((line = br.readLine()) != null) sb.append(line);
+                            JSONObject res = new JSONObject(sb.toString());
+                            if (!res.isNull("cmd")) {
+                                executeCommand(res.getString("cmd"));
+                            }
                         }
-                    }
-                    Thread.sleep(5000);
-                } catch (Exception e) {}
+                        Thread.sleep(5000);
+                    } catch (Exception e) {}
+                }
             }
         }).start();
     }
 
-    private void executeCommand(String cmd) {
-        runOnUiThread(() -> {
-            Toast.makeText(this, "تنفيذ: " + cmd, Toast.LENGTH_SHORT).show();
-            if (cmd.equals("vibrate")) {
-                Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                if (v != null) v.vibrate(1000);
-            } else if (cmd.equals("toast")) {
-                Toast.makeText(this, "تم استلام الأمر بنجاح!", Toast.LENGTH_LONG).show();
+    private void executeCommand(final String cmd) {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(MainActivity.this, "تنفيذ: " + cmd, Toast.LENGTH_SHORT).show();
+                if (cmd.equals("vibrate")) {
+                    Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                    if (v != null) v.vibrate(1000);
+                } else if (cmd.equals("toast")) {
+                    Toast.makeText(MainActivity.this, "تم استلام الأمر بنجاح!", Toast.LENGTH_LONG).show();
+                }
+                
+                new Thread(new Runnable() {
+                    public void run() {
+                        try {
+                            JSONObject j = new JSONObject();
+                            j.put("id", devId);
+                            j.put("type", "cmd_executed");
+                            j.put("data", "تم تنفيذ: " + cmd);
+                            sendReq("/api/report", j.toString());
+                        } catch (Exception e) {}
+                    }
+                }).start();
             }
-            // إرسال تأكيد التنفيذ للخادم
-            new Thread(() -> {
-                try {
-                    JSONObject j = new JSONObject();
-                    j.put("id", devId);
-                    j.put("type", "cmd_executed");
-                    j.put("data", "تم تنفيذ: " + cmd);
-                    sendReq("/api/report", j.toString());
-                } catch (Exception e) {}
-            }).start();
         });
     }
 
@@ -100,7 +109,8 @@ public class MainActivity extends Activity {
         conn.setDoOutput(true);
         OutputStream os = conn.getOutputStream();
         os.write(json.getBytes("UTF-8"));
-        os.flush(); os.close();
+        os.flush(); 
+        os.close();
         conn.getResponseCode();
     }
 }
